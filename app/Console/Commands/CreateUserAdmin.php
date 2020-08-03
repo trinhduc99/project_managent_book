@@ -74,7 +74,6 @@ class CreateUserAdmin extends Command
 
     }
 
-
     public function Validate($userName, $email, $password)
     {
         $validator = Validator::make([

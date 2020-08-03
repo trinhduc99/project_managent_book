@@ -60,7 +60,6 @@ class CategoryController extends Controller
     {
         $this->category->findOrFail($id)->delete();
         return redirect()->route('categories.index');
-
     }
 
     public function search(Request $request)
@@ -68,8 +67,8 @@ class CategoryController extends Controller
         $key_word_search = $request->key_word_search;
         $category = $this->category
             ->where('name', 'like', '%' . $key_word_search . '%');
-        if($category->exists()){
-            $categories= $category->latest()->paginate(5);
+        if ($category->exists()) {
+            $categories = $category->latest()->paginate(5);
             return view('admin.category.search', compact('categories'));
         } else {
             return view('admin.category.notfound');
