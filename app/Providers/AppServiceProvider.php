@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        if (request()->server->has('HTTP_X_ORIGINAL_HOST')) {
+            request()->server->set('HTTP_HOST', request()->server->get('HTTP_X_ORIGINAL_HOST'));
+            request()->headers->set('HOST', request()->server->get('HTTP_X_ORIGINAL_HOST'));
+        }
     }
 }

@@ -17,8 +17,9 @@ class CategoryController extends Controller
         $this->category = $category;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        dd($request->session()->all());
         $categories = $this->category->latest()->paginate(5);
         return view('admin.category.index', compact('categories'));
     }

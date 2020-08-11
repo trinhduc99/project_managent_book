@@ -48,14 +48,22 @@ class CreateUserAdmin extends Command
         $userName = $this->ask('User Name?');
         $email = $this->ask('Email ?');
         $password = $this->secret('Password ?');
-        $this->Validate($userName, $email, $password);
-        $this->InsertDataAdmin($userName, $email, $password);
+        $password_confirmation = $this->secret('Confirm Password ?');
+        $this->InsertDataAdmin($userName, $email, $password, $password_confirmation);
     }
 
-    public function InsertDataAdmin($userName, $email, $password)
+    public function InsertDataAdmin($userName, $email, $password,$password_confirmation )
     {
+        $validate = $this->Validate($userName, $email, $password,$password_confirmation);
+        if ($validate->fails()) {
+            $this->info('User admin not created. See error messages below:');
+            foreach ($validate->errors()->all() as $error) {
+                $this->error($error);
+            }
+            return false;
+        }
         try {
-            DB::beginTransaction();
+
             //insertData
             $user = new User();
             $user->name = $userName;
@@ -63,34 +71,30 @@ class CreateUserAdmin extends Command
             $user->password = Hash::make($password);
             $user->role = 'admin';
             $user->remember_token = Str::random(20);
-            DB::commit();
             $user->save();
+
             $this->info('Staff Account created.');
             return 0;
         } catch (\Exception $exception) {
-            DB::rollBack();
+
             Log::error('Message : ' . $exception->getMessage() . "---------Line :" . $exception->getLine());
         }
 
     }
 
-    public function Validate($userName, $email, $password)
+    public function Validate($userName, $email, $password,$password_confirmation)
     {
-        $validator = Validator::make([
-            'first_name' => $userName,
+        return Validator::make([
+            'user_name' => $userName,
             'email' => $email,
             'password' => $password,
+            'password_confirmation' =>$password_confirmation
         ], [
-            'first_name' => 'required|string|max:191',
+            'user_name' => 'required|string|max:191',
             'email' => 'required|string|email|max:191|unique:users',
-            'password' => 'required|string|max:191|min:6'
+            'password' => 'required|string|max:191|min:6|confirmed',
         ]);
-        if ($validator->fails()) {
-            $this->info('User admin not created. See error messages below:');
-            foreach ($validator->errors()->all() as $error) {
-                $this->error($error);
-            }
-        }
+
     }
 
 }

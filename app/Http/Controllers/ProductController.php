@@ -29,7 +29,7 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
-        $dataProductCreate = $this->InsertDataProduct($request);
+        $dataProductCreate = $this->insertDataProduct($request);
         Product::create($dataProductCreate);
         return redirect()->route('products.index');
     }
@@ -43,7 +43,7 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, $id)
     {
-        $dataProductCreate = $this->InsertDataProduct($request);
+        $dataProductCreate = $this->insertDataProduct($request);
         Product::find($id)->update($dataProductCreate);
         return redirect()->route('products.index');
     }
@@ -56,9 +56,9 @@ class ProductController extends Controller
 
     public function search(Request $request)
     {
-        $key_word_search = $request->key_word_search;
-        $product = Product::where('name', 'like', '%' . $key_word_search . '%')
-            ->orWhere('name_author', 'like', '%' . $key_word_search . '%');
+        $keyWordSearch = $request->key_word_search;
+        $product = Product::where('name', 'like', '%' . $keyWordSearch . '%')
+            ->orWhere('name_author', 'like', '%' . $keyWordSearch . '%');
         if ($product->exists()) {
             $products = $product->orderby('user_id', 'asc')->paginate(5);
             return view('admin.product.search', compact('products'));
@@ -67,9 +67,8 @@ class ProductController extends Controller
         }
     }
 
-    public function InsertDataProduct($request)
+    public function insertDataProduct($request)
     {
-        DB::beginTransaction();
         try {
             $dataProductCreate = [
                 'name' => $request->name,
@@ -83,10 +82,8 @@ class ProductController extends Controller
                 $dataProductCreate['image_path'] = $dataUploadImage['file_path'];
                 $dataProductCreate['image_name'] = $dataUploadImage['file_name'];
             }
-            DB::commit();
             return $dataProductCreate;
         } catch (\Exception $exception) {
-            DB::rollBack();
             Log::error('Message: ' . $exception->getMessage() . ' ------Line: ' . $exception->getLine());
         }
 
